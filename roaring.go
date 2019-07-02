@@ -235,6 +235,25 @@ func (ii *intIterator) Next() uint32 {
 	return x
 }
 
+func (ii *intIterator) NextLimit(limit uint32) (uint32, bool) {
+	changed := false
+	for ii.pos < ii.highlowcontainer.size() && ii.highlowcontainer.getKeyAtIndex(ii.pos) < highbits(limit) {
+		changed = true
+		ii.pos++
+	}
+	if changed {
+		ii.init()
+	}
+
+	for ii.HasNext() {
+		if x := ii.Next(); x > limit {
+			return x, true
+		}
+	}
+
+	return 0xffffffff, false
+}
+
 func newIntIterator(a *Bitmap) *intIterator {
 	p := new(intIterator)
 	p.pos = 0
